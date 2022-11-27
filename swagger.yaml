@@ -1,0 +1,231 @@
+openapi: '3.0.3'
+info:
+  title: Session Beginner
+  description: NodeJS application that exposes REST API for CRUD operations on Users.
+  version: '1.0'
+servers:
+  - url: https://${REPLACE_ME}/api
+  - url: http://localhost:1339/api
+paths:
+  /user/{email}:
+    get:
+      summary: Get a user by email
+      description: Get a user by email
+      parameters:
+        - in: path
+          name: email
+          description: Email of the user to search
+          required: true
+          schema: 
+            type: string
+      responses:
+         '200':
+            $ref: '#/components/responses/GetUser'
+         '404':
+            $ref: '#/components/responses/UserNotFound'
+         '500':
+            $ref: '#/components/responses/GenericException'
+    delete:
+      summary: Delete a user by email
+      description: Delete a user by email
+      parameters:
+        - in: path
+          name: email
+          description: Email of the user to delete
+          required: true
+          schema: 
+            type: string
+      responses:
+         '200':
+            description: Successful operation
+            content:
+              application/json:
+                schema: 
+                  $ref: '#/components/schemas/RestResponse'
+                example: 
+                  statusCode: 200
+                  result: The user with the email "${email}" has been deleted
+         '404':
+            $ref: '#/components/responses/UserNotFound'
+         '500':
+            $ref: '#/components/responses/GenericException'
+    patch:
+      summary: Update firstname and/or lastname of a user
+      description: Update firstname and/or lastname of a user
+      parameters:
+        - in: path
+          name: email
+          description: Email of the user to update
+          required: true
+          schema: 
+            type: string
+        - in: query
+          name: firstname
+          description: Value to update
+          schema: 
+            type: string
+        - in: query
+          name: lastname
+          description: Value to update
+          schema: 
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/GetUser'
+        '400':
+          description: Error returned if a required parameter is null or empty
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/RestResponse"
+              example: 
+                statusCode: 404
+                errorMessage: At least one of the "firstname" or "lastname" parameters must not be null
+        '404':
+          $ref: '#/components/responses/UserNotFound'
+        '500':
+          $ref: '#/components/responses/GenericException'
+  /user:
+    get:
+      summary: Get all users
+      description: Get all users
+      responses:
+        '200':
+          $ref: '#/components/responses/GetUsers'
+        '500':
+          $ref: '#/components/responses/GenericException'
+    post:
+      summary: Create a new user
+      description: Create a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+            example:
+              firstname: John
+              lastname: Smith
+              email: john.smith@ibm.com
+      responses:
+        '201':
+          $ref: '#/components/responses/CreateUser'
+        '400':    
+          $ref: '#/components/responses/MandatoryException'
+        '409':    
+          $ref: '#/components/responses/DuplicateException'
+        '500':
+          $ref: '#/components/responses/GenericException'
+components:
+  responses:
+    CreateUser:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RestResponse'
+          example:
+            statusCode: 201
+            result:
+              firstname: John
+              lastname: Smith
+              email: john.smith@ibm.com  
+    GetUser:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RestResponse'
+          example:
+            statusCode: 200
+            result:
+              firstname: John
+              lastname: Smith
+              email: john.smith@ibm.com
+    GetUsers:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RestResponse'
+          example:
+            statusCode: 200
+            result:
+              - firstname: John
+                lastname: Smith
+                email: john.smith@ibm.com
+    UserNotFound:
+       description: Error returned if the user doesn't exist
+       content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RestResponse'
+          example:
+            statusCode: 404
+            errorMessage: The user with email "${email}" doesn't exist
+    MandatoryException:
+      description: Error returned if a required parameter is null or empty
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RestResponse'
+          examples:
+            object not found:
+              value:
+                statusCode: 400
+                errorMessage: The object user is mandatory
+            firstname is mandatory:
+              value:
+                statusCode: 400
+                errorMessage: The parameter .firstname is mandatory
+            lastname is mandatory:
+              value:
+                statusCode: 400
+                errorMessage: The parameter .lastname is mandatory
+            email is mandatory:
+              value:
+                statusCode: 400
+                errorMessage: The parameter .email is mandatory   
+            syntax error:
+              value:
+                statusCode: 400
+                errorMessage: Unexpected token } in JSON at position 48 
+    DuplicateException:
+      description: Error returned if a object already exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RestResponse'
+          example:
+            statusCode: 409
+            errorMessage: The user with email "${user.email}" already exist
+    GenericException:
+      description: Generic error
+      content:
+        application/json:
+          schema: 
+           $ref: '#/components/schemas/RestResponse'
+          example:
+            statusCode: 500
+            errorMessage: Generic error, see the log for more details
+  schemas:
+    RestResponse:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+        errorMessage:
+          type: string
+        result:
+          anyOf:
+            - type: object
+            - type: array
+    User:
+      type: object
+      properties:
+        firstname:
+          type: string
+        lastname:
+          type: string
+        email:
+          type: string
