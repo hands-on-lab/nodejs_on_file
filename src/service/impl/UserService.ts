@@ -54,7 +54,7 @@ export class UserService implements IUserService {
 
     public async findAll(): Promise<User[]> {
 
-       // TODO:
+        // TODO:
         // You have to write the code to return all the users in the "users.json" file
 
         // --- TIPS: --- //
@@ -63,13 +63,13 @@ export class UserService implements IUserService {
         // 3) The JSON module can help you to parse the a "string" value to a object!!!!
 
         // Get content from file.
-        
+        let content = await fs.readFile(this.filepath, "utf8");
         
         // Parse the content of the file as Json.
-       
+        let users = JSON.parse(content);
 
         // Return the json value.
-        return;
+        return users;
     }
 
     public async findByEmail(email: string): Promise<User> {

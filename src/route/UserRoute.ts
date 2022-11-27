@@ -25,22 +25,19 @@ user_api.get("/", async (req: Request<User>, res: Response<RestResponse<User[]>>
         // TODO:
         // You have to write the code to return all the users obtained by class "UserService" and method "findAll()".
 
-        // Remove it !!!!
-        throw new MethodNotImplemented();
-
         // --- TIPS: --- //
         // 1) You can use the "userService" variable to find all the users.
         // 2) You can use the "RestResponse" utility class to create an object that conforms to the Swagger documentation. Use the ".ok(...)" method.
         // 3) You have to use the "res" parameter to return a HTTP[s] response with the express framework. 
         
         // Find all users using the UserService class.
-    
+        let users = await userService.findAll();
 
         // Create a RestResponse object.
-
+        let response = RestResponse.ok(users);
 
         // Return the list of all users.
-        return;
+        return res.json(response);
 
     } catch (err) {
         next(err);
